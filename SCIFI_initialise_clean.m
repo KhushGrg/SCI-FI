@@ -424,14 +424,14 @@ function run = SCIFI_initialise(runcontrol)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
     %%%%%%% only plot if no tuning structure exists, only plot fluxes for quick runs
-%     if isempty(Gtune) == 1
-%         if plotrun == 1            
-%             if runcontrol>-1
-%                 SCION_plot_worldgraphic
-%             end
-%             SCION_plot_fluxes_weathering
-%         end
-%     end
+    if isempty(Gtune) == 1
+        if plotrun == 1            
+            if runcontrol>-1
+                SCION_plot_worldgraphic
+            end
+            SCION_plot_fluxes_weathering
+        end
+    end
 
    
 end

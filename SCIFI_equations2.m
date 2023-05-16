@@ -249,9 +249,9 @@ ko = biopars.ko25 * ( biopars.q_10o .^ ( ( Tair_ice_past - 25 ) * 0.1 ) ) ;
 
 c2 = ( pi - tstar ) ./ ( pi + kc .* ( 1 + ( pO2 ./ ko ) ) ) ; 
 
-ftemp_tem = normpdf( Tair_ice_past, 15, 20 ) ; % Temperate 
-ftemp_bor = normpdf( Tair_ice_past, 0, 20 ) ; % Boreal 
-ftemp_tro = normpdf( Tair_ice_past, 27, 7 ) ;  % Tropical 
+ftemp_tem = normpdf( Tair_ice_past, 15, 20 ) ; % 15, 7 ) ; % Temperate 
+ftemp_bor = normpdf( Tair_ice_past, 0, 20 ) ; %5, 10 ) ; % Boreal 
+ftemp_tro = normpdf( Tair_ice_past, 27, 7 ) ; % 27, 3 ) ;  % Tropical 
 
 c1_tem = biopars.alpha * ftemp_tem .* ( ( pi - tstar ) ./ ( pi + 2 * tstar ) ) ;
 c1_bor = biopars.alpha * ftemp_bor .* ( ( pi - tstar ) ./ ( pi + 2 * tstar ) ) ; 
@@ -281,9 +281,9 @@ ko = biopars.ko25 * ( biopars.q_10o .^ ( ( Tair_ice_future - 25 ) * 0.1 ) ) ;
 
 c2 = ( pi - tstar ) ./ ( pi + kc .* ( 1 + ( pO2 ./ ko ) ) ) ; 
 
-ftemp_tem = normpdf( Tair_ice_future, 15, 20 ) ; % Temperate 
-ftemp_bor = normpdf( Tair_ice_future, 0, 20 ) ; % Boreal 
-ftemp_tro = normpdf( Tair_ice_future, 27, 7 ) ;  % Tropical 
+ftemp_tem = normpdf( Tair_ice_future, 15, 20 ) ; %15, 7 ) ; % Temperate 
+ftemp_bor = normpdf( Tair_ice_future, 0, 20 ) ; %5, 10 ) ; % Boreal 
+ftemp_tro = normpdf( Tair_ice_future, 27, 7 ) ; %27, 3 ) ;  % Tropical 
 
 c1_tem = biopars.alpha * ftemp_tem .* ( ( pi - tstar ) ./ ( pi + 2 * tstar ) ) ;
 c1_bor = biopars.alpha * ftemp_bor .* ( ( pi - tstar ) ./ ( pi + 2 * tstar ) ) ; 
@@ -361,8 +361,8 @@ while abs( biomass_change_final_step ) > 1
 
     final_biomass_past = max( biomass_tem_past, max( biomass_bor_past, biomass_tro_past ) ) * EVO ;
     final_biomass_future = max( biomass_tem_future, max( biomass_bor_future, biomass_tro_future ) ) * EVO ; 
-    NPP_past = max( NPP_tem_past, max( NPP_bor_past, NPP_tro_past ) ) * EVO ; 
-    NPP_future = max( NPP_tem_future, max( NPP_bor_future, NPP_tro_future ) ) * EVO ; 
+%     NPP_past = max( NPP_tem_past, max( NPP_bor_past, NPP_tro_past ) ) * EVO ; 
+%     NPP_future = max( NPP_tem_future, max( NPP_bor_future, NPP_tro_future ) ) * EVO ; 
 
     %%% Carbon in leaf allocation (n+1)
     C_leaf_tem_past = ( C_leaf_tem_past .* ( 1 - biopars.life_leaf_tem ) ) + ( biopars.lr_max .* NPP_tem_past ) ;
@@ -383,14 +383,45 @@ while abs( biomass_change_final_step ) > 1
 end
 
 %%%%%%% Calculating effect of biomass on weathering
-f_biota_past = 0.0005 * NPP_past + ( biopars.minbiota * RCO2 ^ 0.25 ) ; 
-f_biota_future = 0.0005 * NPP_future + ( biopars.minbiota * RCO2 ^ 0.25 ) ; 
+
+for i = 1 : 40
+    for j = 1 : 48
+       %1 = temperate, 2 = boreal, 3 = tropical, 4 = ice/desert
+       if final_biomass_past ( i , j ) == biomass_tem_past( i , j ) * EVO
+%            biome( i , j ) = 1 ; 
+           NPP_past(i,j) = NPP_tem_past(i,j) ; 
+       elseif final_biomass_past(i,j) == biomass_bor_past( i , j ) * EVO
+%            biome( i , j ) = 2 ; 
+           NPP_past(i,j) = NPP_bor_past(i,j) ; 
+       elseif final_biomass_past(i,j) == biomass_tro_past( i , j ) * EVO
+%            biome( i , j ) = 3 ;
+           NPP_past(i,j) = NPP_tro_past(i,j) ; 
+       else
+%            biome( i , j ) = 4 ; 
+           NPP_past(i,j) = NaN ; 
+       end
+       if final_biomass_future ( i, j ) == biomass_tem_future( i, j ) * EVO
+           NPP_future( i, j ) = NPP_tem_future( i, j );
+       elseif final_biomass_future ( i, j ) == biomass_bor_future( i, j ) * EVO
+           NPP_future( i, j ) = NPP_bor_future( i, j );
+       elseif final_biomass_future ( i, j ) == biomass_tro_future( i, j ) * EVO
+           NPP_future( i, j ) = NPP_tro_future( i, j );
+       else
+           NPP_future( i, j ) = NaN ; 
+       end
+    end
+end
+
+
+f_biota_past = 0.0005 * NPP_past * EVO + ( biopars.minbiota * RCO2 ^ 0.25 ) ; 
+f_biota_future = 0.0005 * NPP_future * EVO + ( biopars.minbiota * RCO2 ^ 0.25 ) ; 
 
 f_biota_past( land_past == 1 & isnan( f_biota_past ) ) = biopars.minbiota .* RCO2 ^ 0.25  ;
 f_biota_future( land_future == 1 & isnan( f_biota_future ) ) = biopars.minbiota .* RCO2 ^ 0.25 ; 
 
 %%%%%%% Mass of biosphere
 VEG = biomass_tot( end ) / 4.53e17 ; 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -802,9 +833,10 @@ if sensanal == 0
     workingstate.relativenewp(stepnumber,1) = newp/pars.newp0 ;
     workingstate.erosion_tot(stepnumber,1) = erosion_tot ;
     workingstate.biomass_tot(stepnumber,1) = sum( nansum( biomass_tot( end ) ) ) ;
-    workingstate.NPP(stepnumber,1) = sum( nansum( NPP_past .* ( GRID_AREA_km2 .* 1e6 ) ) ) ; 
+    workingstate.NPP(stepnumber,1) = ( sum( nansum( NPP_past .* ( GRID_AREA_km2 .* 1e6 ) ) ) * contribution_past ) + ( sum( nansum( NPP_future .* (GRID_AREA_km2 .* 1e6 ) ) ) * contribution_future) ; 
     workingstate.hab_area(stepnumber,1) = ((( sum( sum( ~isnan( final_biomass_past ) & final_biomass_past > 0 ))) / ( sum( nansum( land_past )))) * 100 * contribution_past ) + ((( sum( sum( ~isnan( final_biomass_future ) & final_biomass_future > 0 )))/ ( sum( nansum(land_future)))) * 100 * contribution_future ) ;
-
+    
+%     workingstate.turnover(stepnumber,1) = turnover ; 
     %%%%%%%% print time
     workingstate.time_myr(stepnumber,1) = t_geol ;
 end
@@ -830,8 +862,11 @@ if sensanal == 0
             gridstate.EPSILON(:,:,pars.gridstamp_number) = EPSILON_past * 1e6 ; %%% t/km2/yr
             gridstate.BIOMASS_tot_grid(:,:,pars.gridstamp_number) = final_biomass_past; %g C/m2 
             gridstate.f_biota(:,:,pars.gridstamp_number) = f_biota_past ;
-            gridstate.NPP(:,:,pars.gridstamp_number) = NPP_past ; 
+%             gridstate.NPP(:,:,pars.gridstamp_number) = NPP_past ; 
           
+
+%             gridstate.biome(:,:,pars.gridstamp_number) = biome ; 
+%             gridstate.NPP_biome(:,:,pars.gridstamp_number) = final_NPP ; 
             %%%% set next boundary
             if t_geol < 0
                 pars.gridstamp_number = pars.gridstamp_number + 1 ;
