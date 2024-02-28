@@ -363,3 +363,47 @@ text(-590,1.6,'BA','color','k')
 text(-590,1.4,'GA','color',[0.8 0.8 0.8])
 %%%% Title
 title('Forcings')
+
+%%% Colour scheme for Figure S2
+biomass_colour = [ 255 255 204
+    220 232 149
+    161 218 180
+    132 219 161
+    65 182 196
+    33 149 163
+    44 127 184
+    22 104 161
+    37 52 148
+    11 20 79 ] ./ 255 ; 
+
+grayscale = flipud( [ 20 20 20
+    37 38 38
+    59 57 57
+    92 88 88
+    107 103 103
+    125 120 120
+    143 137 137
+    171 164 164
+    194 188 188
+    212 206 205 
+    230 223 223
+    230 230 230 ]./ 255) ;
+
+%Calculating difference in data curves: 250Ma onwards; binned every Ma
+%modelled data
+temp = scifi_run.state.tempC(889:end) ; 
+time = scifi_run.state.time_myr(889:end) ;
+%SCION data
+scion_time = scion_run.state.time_myr(600:end) ; 
+scion_temp = scion_run.state.tempC(600:end) ; 
+%actual data interpolated to fit model time
+time_bins = -250:0 ; 
+interp_temp(:,1) = interp1(flipud(Scotese_2021_age(1:251)), flipud(Scotese_2021_GAT(1:251)), time_bins) ;
+%SCION data interpolated to fit model time
+interp_temp(:,2) = interp1(scion_time, scion_temp, time_bins) ; 
+interp_temp(:,3) = interp1(time, temp, time_bins) ; 
+data_diff = interp_temp(:,1) - interp_temp(:,2) ;
+data_diff(:,2) = interp_temp(:,1) - interp_temp(:,3) ; 
+dist = sqrt(data_diff(:,1).^2);
+dist(:,2) = sqrt(data_diff(:,2).^2) ; 
+

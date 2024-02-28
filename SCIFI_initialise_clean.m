@@ -11,7 +11,7 @@
 %%%%%%%%%%%%%%%%%   Define parameters   %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function run = SCIFI_initialise(runcontrol)
+function run = SCIFI_initialise_clean(runcontrol)
 
     %%%%%%% remove structures from pervious runs 
     clear stepnumber
@@ -272,8 +272,8 @@ function run = SCIFI_initialise(runcontrol)
     end
 
     %%%%%%% model timeframe in years (0 = present day)
-    pars.whenstart = - 600e6 ;
-    pars.whenend = 0 ;
+    pars.whenstart = - 250e6 ;
+    pars.whenend = -0e6 ;
 
     %%%%%%% setp up grid stamp times
     if runcontrol == -2
